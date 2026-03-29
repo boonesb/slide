@@ -1,2 +1,99 @@
-# slide
-Makes a slide from a picture 
+# slide-rebuilder
+
+Production-style Next.js starter for **image-to-editable-slide generation**.
+
+## What it does
+
+- Upload one slide image (PNG/JPG/JPEG/WebP up to 10MB)
+- Analyze with OpenAI Responses API (default model `gpt-5-mini`) or deterministic mock mode
+- Build a typed 3-layer schema (`metadata`, `content`, `layout`)
+- Validate with Zod + reference checks, then perform one repair retry on failure
+- Let user edit detected text/content before final render
+- Render deterministic editable PPTX via PptxGenJS (with speaker notes placeholders)
+- Provide debug HTML page with raw request/response + normalized schema + diagnostics
+- Regenerate using same upload and changed mode/theme without re-uploading
+
+## Architecture (layered)
+
+1. `app/` UI + API routes
+2. `lib/ai/` prompt composition, OpenAI integration, mock outputs
+3. `lib/schema/` schema contract (Zod + JSON schema)
+4. `lib/validation/` app-side validation and contentRef checks
+5. `lib/templates/` archetype template registry (all 8 archetypes)
+6. `lib/themes/` design token themes + custom theme schema
+7. `lib/render/` deterministic schema-to-PPTX renderer
+8. `lib/debug/` ephemeral diagnostics store
+
+This separates AI inference from deterministic layout/rendering, enabling maintainability and future multi-slide expansion.
+
+## Modes
+
+- `rebuild_faithfully`: preserve wording/structure as much as possible
+- `rebuild_and_polish` (default): preserve message while improving hierarchy/clarity
+- `use_as_inspiration`: preserve intent and allow stronger rewrite/layout changes
+
+## Themes
+
+Built-in:
+- Enterprise Clean
+- Enterprise Dark
+- Consulting Minimal
+- Custom (JSON)
+
+Custom theme supports typography, color, spacing/layout, containers, visual/icon tokens.
+Use file upload or paste JSON in UI. `lib/themes/themes.ts` includes starter JSON example (`CUSTOM_THEME_EXAMPLE`).
+
+## OpenAI configuration
+
+Create `.env` from `.env.example`:
+
+```bash
+OPENAI_API_KEY=
+OPENAI_MODEL=gpt-5-mini
+OPENAI_USE_MOCK=true
+```
+
+- `OPENAI_USE_MOCK=true` => deterministic local archetype outputs
+- `OPENAI_USE_MOCK=false` => real OpenAI Responses API with structured JSON schema output
+
+## Local setup
+
+```bash
+npm install
+npm run dev
+```
+
+Open `http://localhost:3000`.
+
+## Debug page
+
+After generation, follow “Open debug diagnostics” link to `/debug/[id]`.
+Shows:
+- request summary
+- selected mode/theme/template/archetype (in payload)
+- raw AI request payload
+- raw AI response payload
+- cleaned internal schema
+- validation and repair results
+- rendering diagnostics
+
+## Testing
+
+```bash
+npm run test
+npm run typecheck
+```
+
+Included tests:
+- schema validation
+- template registry coverage
+- theme tokens
+- mock output conformance
+- PPTX renderer smoke test
+
+## Deployment notes
+
+- App Router + server-side API integration is Vercel-compatible
+- No auth and no persistence in v1
+- Upload handling is ephemeral in request memory
+- Structured to support Dockerization later
