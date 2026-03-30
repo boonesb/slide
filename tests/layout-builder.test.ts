@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { makeMockSchema } from "@/lib/ai/mock-data";
 import { buildDeterministicLayout } from "@/lib/layout/build-layout";
 import { BUILTIN_THEMES } from "@/lib/themes/themes";
+import { decorativeThreePanelFixture } from "@/tests/fixtures/decorative-three-panel";
 
 const SLIDE_W = 13.333;
 const SLIDE_H = 7.5;
@@ -23,8 +24,8 @@ describe("deterministic layout builder", () => {
     }
   });
 
-  it("avoids major overlap in representative two-column layout", () => {
-    const result = buildDeterministicLayout(makeMockSchema("two_column"), BUILTIN_THEMES["Enterprise Clean"]);
+  it("avoids overlap in representative three-card layout", () => {
+    const result = buildDeterministicLayout(makeMockSchema("three_card"), BUILTIN_THEMES["Enterprise Clean"]);
     const elements = result.schema.layout.elements.filter((e) => ["card", "shape"].includes(e.type));
 
     for (let i = 0; i < elements.length; i++) {
@@ -32,5 +33,14 @@ describe("deterministic layout builder", () => {
         expect(overlaps(elements[i], elements[j])).toBe(false);
       }
     }
+  });
+
+  it("translates decorative 3-panel fixture to enterprise three-card archetype", () => {
+    const result = buildDeterministicLayout(decorativeThreePanelFixture, BUILTIN_THEMES["Enterprise Clean"]);
+    expect(result.normalized.sourceClass).toBe("multi_panel_promo");
+    expect(result.normalized.archetype).toBe("three_card");
+    expect(result.schema.metadata.template).toContain("three_card");
+    expect(result.schema.layout.elements.filter((e) => e.groupRole === "card")).toHaveLength(3);
+    expect(result.diagnostics.notes.join(" ")).toContain("simplifying background effects");
   });
 });

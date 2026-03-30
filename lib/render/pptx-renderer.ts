@@ -10,13 +10,14 @@ export async function renderPptxBuffer(schema: SlideSchema, theme: ThemeTokens):
 
   for (const el of [...schema.layout.elements].sort((a, b) => a.zIndex - b.zIndex)) {
     if (el.type === "shape" || el.type === "line") {
-      slide.addShape(pptx.ShapeType.roundRect, {
+      const container = containerByStyleToken(el.styleToken, theme);
+      slide.addShape(el.type === "line" ? pptx.ShapeType.line : pptx.ShapeType.roundRect, {
         x: el.x,
         y: el.y,
         w: el.w,
         h: el.h,
-        fill: { color: theme.containers.panel_subtle?.fill ?? theme.colors.bg_subtle },
-        line: { color: theme.visual.divider_standard?.stroke ?? theme.colors.divider_subtle, pt: el.type === "line" ? 1.2 : 0.8 }
+        fill: { color: container.fill },
+        line: { color: container.line, pt: el.type === "line" ? 1.2 : 0.8 }
       });
       continue;
     }
@@ -44,15 +45,25 @@ export async function renderPptxBuffer(schema: SlideSchema, theme: ThemeTokens):
         w: el.w,
         h: el.h,
         fill: { color: container.fill },
-        line: { color: container.line, pt: 0.8 }
+        line: { color: container.line, pt: 0.9 }
       });
+
+      if (el.groupRole === "card" || el.groupRole?.includes("column")) {
+        slide.addShape(pptx.ShapeType.line, {
+          x: el.x + 0.1,
+          y: el.y + 0.42,
+          w: el.w - 0.2,
+          h: 0,
+          line: { color: theme.visual.divider_standard?.stroke ?? theme.colors.divider_subtle, pt: 0.6 }
+        });
+      }
     }
 
     slide.addText(text, {
-      x: el.type === "card" ? el.x + theme.layout.padding_card * 0.7 : el.x,
-      y: el.type === "card" ? el.y + theme.layout.padding_card * 0.6 : el.y,
-      w: el.type === "card" ? el.w - theme.layout.padding_card * 1.4 : el.w,
-      h: el.type === "card" ? el.h - theme.layout.padding_card * 1.2 : el.h,
+      x: el.type === "card" ? el.x + theme.layout.padding_card : el.x,
+      y: el.type === "card" ? el.y + theme.layout.padding_card : el.y,
+      w: el.type === "card" ? el.w - theme.layout.padding_card * 2 : el.w,
+      h: el.type === "card" ? el.h - theme.layout.padding_card * 2 : el.h,
       fontFace: textStyle.fontFace,
       fontSize: textStyle.fontSize,
       color: textStyle.color,
@@ -61,59 +72,42 @@ export async function renderPptxBuffer(schema: SlideSchema, theme: ThemeTokens):
       margin: textStyle.margin,
       valign: textStyle.valign as never,
       breakLine: true,
+      fit: "shrink",
+      shrinkText: true,
       isTextBox: true
     });
   }
 
-  slide.addNotes(`mode: ${schema.metadata.mode}\narchetype: ${schema.metadata.slideArchetype}\ngenerated_at: ${new Date().toISOString()}\nsource_summary: image_upload\nspeaking_points: [add key points here]`);
+  slide.addText(theme.name, {
+    x: 10.8,
+    y: 7.15,
+    w: 2,
+    h: 0.2,
+    fontFace: theme.typography.caption_small.fontFace,
+    fontSize: theme.typography.caption_small.fontSize,
+    color: theme.colors.text_secondary,
+    align: "right"
+  });
 
+  slide.addNotes(`mode: ${schema.metadata.mode}\narchetype: ${schema.metadata.slideArchetype}\nsource_summary: image_upload\nspeaking_points: [add key points here]`);
   const arr = (await pptx.write({ outputType: "arraybuffer" })) as ArrayBuffer;
   return Buffer.from(arr);
 }
 
 function textStyleByToken(styleToken: string, groupRole: string | null, theme: ThemeTokens) {
   const map: Record<string, { fontFace: string; fontSize: number; bold?: boolean; italic?: boolean; color: string; margin: number; valign: "top" | "mid" | "bot" }> = {
-    title_primary: {
-      ...theme.typography.title_primary,
-      color: theme.colors.text_primary,
-      margin: 1,
-      valign: "top"
-    },
-    title_secondary: {
-      ...theme.typography.title_secondary,
-      color: theme.colors.text_secondary,
-      margin: 1,
-      valign: "top"
-    },
-    section_label: {
-      ...theme.typography.section_label,
-      color: theme.colors.accent_primary,
-      margin: 0,
-      valign: "top"
-    },
-    quote_primary: {
-      ...theme.typography.quote_primary,
-      italic: true,
-      color: theme.colors.text_primary,
-      margin: 1,
-      valign: "mid"
-    },
-    stat_callout: {
-      ...theme.typography.stat_large,
-      color: theme.colors.accent_primary,
-      margin: 1,
-      valign: "mid"
-    },
-    body_primary: {
-      ...theme.typography.body_primary,
-      color: theme.colors.text_primary,
-      margin: 1,
-      valign: "top"
-    }
+    title_primary: { ...theme.typography.title_primary, color: theme.colors.text_primary, margin: 1, valign: "top" },
+    title_secondary: { ...theme.typography.title_secondary, color: theme.colors.text_secondary, margin: 1, valign: "top" },
+    section_label: { ...theme.typography.section_label, color: theme.colors.accent_primary, margin: 0, valign: "top" },
+    quote_primary: { ...theme.typography.quote_primary, italic: true, color: theme.colors.text_primary, margin: 1, valign: "mid" },
+    stat_callout: { ...theme.typography.stat_large, color: theme.colors.accent_primary, margin: 1, valign: "mid" },
+    body_primary: { ...theme.typography.body_primary, color: theme.colors.text_primary, margin: 1, valign: "top" }
   };
 
   if (groupRole === "quote_block") return map.quote_primary;
-  if (groupRole === "proof_panel") return { ...map.body_primary, ...theme.typography.body_secondary, color: theme.colors.text_secondary, valign: "top" as const };
+  if (groupRole === "proof_panel") return { ...map.body_primary, ...theme.typography.body_secondary, color: theme.colors.text_secondary };
+  if (groupRole === "subtitle") return { ...map.title_secondary, fontSize: Math.max(14, map.title_secondary.fontSize - 2) };
+  if (groupRole === "section_label") return { ...map.section_label, fontSize: Math.max(12, map.section_label.fontSize) };
   return map[styleToken] ?? map.body_primary;
 }
 
@@ -124,6 +118,7 @@ function containerByStyleToken(styleToken: string, theme: ThemeTokens) {
   if (styleToken.includes("feature")) return withDefaults(theme.containers.card_feature, fallback);
   if (styleToken.includes("stat")) return withDefaults(theme.containers.stat_callout, fallback);
   if (styleToken.includes("quote")) return withDefaults(theme.containers.panel_subtle, fallback);
+  if (styleToken.includes("panel")) return withDefaults(theme.containers.panel_subtle, fallback);
   return withDefaults(theme.containers.card_neutral, fallback);
 }
 
@@ -131,7 +126,7 @@ function withDefaults(token: { fill: string; line?: string; radius?: number }, f
   return {
     fill: token.fill ?? fallback.fill,
     line: token.line ?? fallback.line ?? "CBD5E1",
-    radius: token.radius ?? fallback.radius ?? 4
+    radius: token.radius ?? fallback.radius ?? 6
   };
 }
 
