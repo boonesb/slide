@@ -77,6 +77,25 @@ export interface SlideSchema {
 }
 
 export interface GenerationDiagnostics {
+  ai?: {
+    requestedAt: string;
+    model: string;
+    mock: boolean;
+    usage?: {
+      inputTokens: number;
+      outputTokens: number;
+      totalTokens: number;
+    };
+    estimatedCostUsd?: number;
+    sessionEstimatedCostTotalUsd?: number;
+    error?: {
+      message: string;
+      status?: number;
+      type?: string;
+      code?: string;
+      param?: string;
+    };
+  };
   requestSummary: Record<string, unknown>;
   rawAiRequest: Record<string, unknown>;
   rawAiResponse: Record<string, unknown>;

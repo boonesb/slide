@@ -133,7 +133,12 @@ export default function HomePage() {
             )}
           </div>
           {error && <p className="text-sm text-red-600">{error}</p>}
-          {debugId && <a className="text-sm text-blue-700 underline" href={`/debug/${debugId}`}>Open debug diagnostics</a>}
+          {debugId && (
+            <div className="flex flex-col gap-1 text-sm">
+              <a className="text-blue-700 underline" href={`/debug/${debugId}`}>Open debug diagnostics</a>
+              <a className="text-blue-700 underline" href={`/cost/${debugId}`}>Open cost diagnostics</a>
+            </div>
+          )}
         </div>
 
         <StatusPanel current={status} />
