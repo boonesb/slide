@@ -1,6 +1,24 @@
 import { z } from "zod";
 import { ARCHETYPES, MODES, REWRITE_ALLOWED, VISUAL_WEIGHT } from "@/types/slide";
 
+const metadataProperties = {
+  requestId: { type: "string" },
+  slideId: { type: "string" },
+  sourceType: { type: "string", enum: ["image_upload"] },
+  mode: { type: "string", enum: MODES },
+  qualityProfile: { type: "string", enum: ["enterprise_b2b_v1"] },
+  slideArchetype: { type: "string", enum: ARCHETYPES },
+  subtype: { type: ["string", "null"] },
+  confidence: { type: "number", minimum: 0, maximum: 1 },
+  theme: { type: "string", enum: ["Enterprise Clean", "Enterprise Dark", "Consulting Minimal", "Custom"] },
+  template: { type: "string" },
+  transformationLevel: { type: "string" },
+  notes: {
+    type: ["array", "null"],
+    items: { type: "string" }
+  }
+} as const;
+
 export const slideSchemaZod = z.object({
   schemaVersion: z.string().default("1.0.0"),
   metadata: z.object({
@@ -10,12 +28,12 @@ export const slideSchemaZod = z.object({
     mode: z.enum(MODES),
     qualityProfile: z.literal("enterprise_b2b_v1"),
     slideArchetype: z.enum(ARCHETYPES),
-    subtype: z.string().optional(),
+    subtype: z.string().nullable(),
     confidence: z.number().min(0).max(1),
     theme: z.enum(["Enterprise Clean", "Enterprise Dark", "Consulting Minimal", "Custom"]),
     template: z.string(),
     transformationLevel: z.string(),
-    notes: z.array(z.string()).optional()
+    notes: z.array(z.string()).nullable()
   }),
   content: z.object({
     title: z.string().min(1),
@@ -80,35 +98,8 @@ export const slideJsonSchema = {
     metadata: {
       type: "object",
       additionalProperties: false,
-      required: [
-        "requestId",
-        "slideId",
-        "sourceType",
-        "mode",
-        "qualityProfile",
-        "slideArchetype",
-        "confidence",
-        "theme",
-        "template",
-        "transformationLevel"
-      ],
-      properties: {
-        requestId: { type: "string" },
-        slideId: { type: "string" },
-        sourceType: { type: "string", enum: ["image_upload"] },
-        mode: { type: "string", enum: MODES },
-        qualityProfile: { type: "string", enum: ["enterprise_b2b_v1"] },
-        slideArchetype: { type: "string", enum: ARCHETYPES },
-        subtype: { type: "string" },
-        confidence: { type: "number", minimum: 0, maximum: 1 },
-        theme: { type: "string", enum: ["Enterprise Clean", "Enterprise Dark", "Consulting Minimal", "Custom"] },
-        template: { type: "string" },
-        transformationLevel: { type: "string" },
-        notes: {
-          type: "array",
-          items: { type: "string" }
-        }
-      }
+      properties: metadataProperties,
+      required: Object.keys(metadataProperties)
     },
     content: {
       type: "object",

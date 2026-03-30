@@ -10,6 +10,7 @@ export function makeMockSchema(archetype: SlideArchetype): SlideSchema {
       mode: "rebuild_and_polish",
       qualityProfile: "enterprise_b2b_v1",
       slideArchetype: archetype,
+      subtype: null,
       confidence: 0.92,
       theme: "Enterprise Clean",
       template: `${archetype}-v1`,

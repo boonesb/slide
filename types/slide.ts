@@ -26,12 +26,12 @@ export interface SlideSchema {
     mode: Mode;
     qualityProfile: "enterprise_b2b_v1";
     slideArchetype: SlideArchetype;
-    subtype?: string;
+    subtype: string | null;
     confidence: number;
     theme: ThemeName;
     template: string;
     transformationLevel: string;
-    notes?: string[];
+    notes: string[] | null;
   };
   content: {
     title: string;
