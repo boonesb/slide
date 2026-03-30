@@ -37,13 +37,13 @@ export const slideSchemaZod = z.object({
   }),
   content: z.object({
     title: z.string().min(1),
-    subtitle: z.string().optional(),
+    subtitle: z.string().nullable(),
     sections: z.array(
       z.object({
         id: z.string(),
-        heading: z.string().optional(),
+        heading: z.string().nullable(),
         body: z.string(),
-        bullets: z.array(z.string()).optional()
+        bullets: z.array(z.string()).nullable()
       })
     ),
     supportingVisual: z
@@ -51,7 +51,7 @@ export const slideSchemaZod = z.object({
         type: z.enum(["icon", "chart", "diagram", "image"]),
         description: z.string()
       })
-      .optional(),
+      .nullable(),
     semanticObjects: z.array(
       z.object({
         id: z.string(),
@@ -61,9 +61,9 @@ export const slideSchemaZod = z.object({
         mustPreserve: z.boolean(),
         rewriteAllowed: z.enum(REWRITE_ALLOWED),
         visualWeight: z.enum(VISUAL_WEIGHT),
-        headline: z.string().optional(),
-        body: z.string().optional(),
-        iconHint: z.string().optional()
+        headline: z.string().nullable(),
+        body: z.string().nullable(),
+        iconHint: z.string().nullable()
       })
     )
   }),
@@ -74,16 +74,16 @@ export const slideSchemaZod = z.object({
       z.object({
         id: z.string(),
         type: z.enum(["text", "shape", "card", "icon", "line", "image"]),
-        contentRef: z.string().optional(),
+        contentRef: z.string().nullable(),
         styleToken: z.string(),
         x: z.number().min(0),
         y: z.number().min(0),
         w: z.number().positive(),
         h: z.number().positive(),
         zIndex: z.number().int(),
-        groupRole: z.string().optional(),
-        children: z.array(z.string()).optional(),
-        assetRef: z.string().optional()
+        groupRole: z.string().nullable(),
+        children: z.array(z.string()).nullable(),
+        assetRef: z.string().nullable()
       })
     )
   })
@@ -104,29 +104,29 @@ export const slideJsonSchema = {
     content: {
       type: "object",
       additionalProperties: false,
-      required: ["title", "sections", "semanticObjects"],
+      required: ["title", "subtitle", "sections", "supportingVisual", "semanticObjects"],
       properties: {
         title: { type: "string", minLength: 1 },
-        subtitle: { type: "string" },
+        subtitle: { type: ["string", "null"] },
         sections: {
           type: "array",
           items: {
             type: "object",
             additionalProperties: false,
-            required: ["id", "body"],
+            required: ["id", "heading", "body", "bullets"],
             properties: {
               id: { type: "string" },
-              heading: { type: "string" },
+              heading: { type: ["string", "null"] },
               body: { type: "string" },
               bullets: {
-                type: "array",
+                type: ["array", "null"],
                 items: { type: "string" }
               }
             }
           }
         },
         supportingVisual: {
-          type: "object",
+          type: ["object", "null"],
           additionalProperties: false,
           required: ["type", "description"],
           properties: {
@@ -139,7 +139,7 @@ export const slideJsonSchema = {
           items: {
             type: "object",
             additionalProperties: false,
-            required: ["id", "kind", "role", "priority", "mustPreserve", "rewriteAllowed", "visualWeight"],
+            required: ["id", "kind", "role", "priority", "mustPreserve", "rewriteAllowed", "visualWeight", "headline", "body", "iconHint"],
             properties: {
               id: { type: "string" },
               kind: { type: "string" },
@@ -148,9 +148,9 @@ export const slideJsonSchema = {
               mustPreserve: { type: "boolean" },
               rewriteAllowed: { type: "string", enum: REWRITE_ALLOWED },
               visualWeight: { type: "string", enum: VISUAL_WEIGHT },
-              headline: { type: "string" },
-              body: { type: "string" },
-              iconHint: { type: "string" }
+              headline: { type: ["string", "null"] },
+              body: { type: ["string", "null"] },
+              iconHint: { type: ["string", "null"] }
             }
           }
         }
@@ -175,23 +175,23 @@ export const slideJsonSchema = {
           items: {
             type: "object",
             additionalProperties: false,
-            required: ["id", "type", "styleToken", "x", "y", "w", "h", "zIndex"],
+            required: ["id", "type", "contentRef", "styleToken", "x", "y", "w", "h", "zIndex", "groupRole", "children", "assetRef"],
             properties: {
               id: { type: "string" },
               type: { type: "string", enum: ["text", "shape", "card", "icon", "line", "image"] },
-              contentRef: { type: "string" },
+              contentRef: { type: ["string", "null"] },
               styleToken: { type: "string" },
               x: { type: "number", minimum: 0 },
               y: { type: "number", minimum: 0 },
               w: { type: "number", exclusiveMinimum: 0 },
               h: { type: "number", exclusiveMinimum: 0 },
               zIndex: { type: "integer" },
-              groupRole: { type: "string" },
+              groupRole: { type: ["string", "null"] },
               children: {
-                type: "array",
+                type: ["array", "null"],
                 items: { type: "string" }
               },
-              assetRef: { type: "string" }
+              assetRef: { type: ["string", "null"] }
             }
           }
         }
