@@ -26,23 +26,23 @@ export interface SlideSchema {
     mode: Mode;
     qualityProfile: "enterprise_b2b_v1";
     slideArchetype: SlideArchetype;
-    subtype?: string;
+    subtype: string | null;
     confidence: number;
     theme: ThemeName;
     template: string;
     transformationLevel: string;
-    notes?: string[];
+    notes: string[] | null;
   };
   content: {
     title: string;
-    subtitle?: string;
+    subtitle: string | null;
     sections: Array<{
       id: string;
-      heading?: string;
+      heading: string | null;
       body: string;
-      bullets?: string[];
+      bullets: string[] | null;
     }>;
-    supportingVisual?: { type: "icon" | "chart" | "diagram" | "image"; description: string };
+    supportingVisual: { type: "icon" | "chart" | "diagram" | "image"; description: string } | null;
     semanticObjects: Array<{
       id: string;
       kind: string;
@@ -51,9 +51,9 @@ export interface SlideSchema {
       mustPreserve: boolean;
       rewriteAllowed: (typeof REWRITE_ALLOWED)[number];
       visualWeight: (typeof VISUAL_WEIGHT)[number];
-      headline?: string;
-      body?: string;
-      iconHint?: string;
+      headline: string | null;
+      body: string | null;
+      iconHint: string | null;
     }>;
   };
   layout: {
@@ -62,16 +62,16 @@ export interface SlideSchema {
     elements: Array<{
       id: string;
       type: "text" | "shape" | "card" | "icon" | "line" | "image";
-      contentRef?: string;
+      contentRef: string | null;
       styleToken: string;
       x: number;
       y: number;
       w: number;
       h: number;
       zIndex: number;
-      groupRole?: string;
-      children?: string[];
-      assetRef?: string;
+      groupRole: string | null;
+      children: string[] | null;
+      assetRef: string | null;
     }>;
   };
 }
