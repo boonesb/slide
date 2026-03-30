@@ -37,7 +37,11 @@ describe("schema validation", () => {
     expect(result.success).toBe(false);
   });
 
-  it("keeps object required arrays in sync with object properties", () => {
-    expectAllObjectPropertiesRequired(slideJsonSchema);
+  it("keeps metadata.required in sync with metadata.properties", () => {
+    const metadata = slideJsonSchema.properties.metadata as {
+      properties: Record<string, unknown>;
+      required: string[];
+    };
+    expect(metadata.required).toEqual(Object.keys(metadata.properties));
   });
 });

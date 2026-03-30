@@ -1,13 +1,29 @@
 async function getDebug(id: string) {
   const base = process.env.NEXT_PUBLIC_BASE_URL ?? "http://localhost:3000";
   const res = await fetch(`${base}/api/debug/${id}`, { cache: "no-store" });
-  if (!res.ok) throw new Error("Debug payload not found");
+  if (!res.ok) return null;
   return res.json();
 }
 
 export default async function DebugPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const data = await getDebug(id);
+
+  if (!data) {
+    return (
+      <div className="space-y-4">
+        <h1 className="text-2xl font-semibold">Debug report unavailable</h1>
+        <section className="rounded border bg-white p-4">
+          <p className="font-medium">Debug payload expired or unavailable.</p>
+          <p className="mt-2 text-sm text-slate-700">Debug ID: {id}</p>
+          <p className="mt-2 text-sm text-slate-700">
+            Reproduce by triggering a new generation and opening the latest debug link immediately.
+            Debug payloads are short-lived and may be removed after the TTL window.
+          </p>
+        </section>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4">
