@@ -85,8 +85,13 @@ export async function POST(req: Request) {
       ai: { ...diagnostics.ai, error: errorDetails },
       validation: { success: false, errors: errorDetails }
     });
-    return new Response(`Generation failed: ${errorDetails.message} (status: ${errorDetails.status ?? "n/a"})`, {
-      status: errorDetails.status ?? 500
-    });
+    return NextResponse.json(
+      {
+        error: `Generation failed: ${errorDetails.message} (status: ${errorDetails.status ?? "n/a"})`,
+        debugId,
+        details: errorDetails
+      },
+      { status: errorDetails.status ?? 500 }
+    );
   }
 }
