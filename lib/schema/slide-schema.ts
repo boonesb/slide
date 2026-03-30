@@ -10,12 +10,12 @@ export const slideSchemaZod = z.object({
     mode: z.enum(MODES),
     qualityProfile: z.literal("enterprise_b2b_v1"),
     slideArchetype: z.enum(ARCHETYPES),
-    subtype: z.string().optional(),
+    subtype: z.string().nullable(),
     confidence: z.number().min(0).max(1),
     theme: z.enum(["Enterprise Clean", "Enterprise Dark", "Consulting Minimal", "Custom"]),
     template: z.string(),
     transformationLevel: z.string(),
-    notes: z.array(z.string()).optional()
+    notes: z.array(z.string()).nullable()
   }),
   content: z.object({
     title: z.string().min(1),
@@ -87,10 +87,12 @@ export const slideJsonSchema = {
         "mode",
         "qualityProfile",
         "slideArchetype",
+        "subtype",
         "confidence",
         "theme",
         "template",
-        "transformationLevel"
+        "transformationLevel",
+        "notes"
       ],
       properties: {
         requestId: { type: "string" },
@@ -99,13 +101,13 @@ export const slideJsonSchema = {
         mode: { type: "string", enum: MODES },
         qualityProfile: { type: "string", enum: ["enterprise_b2b_v1"] },
         slideArchetype: { type: "string", enum: ARCHETYPES },
-        subtype: { type: "string" },
+        subtype: { type: ["string", "null"] },
         confidence: { type: "number", minimum: 0, maximum: 1 },
         theme: { type: "string", enum: ["Enterprise Clean", "Enterprise Dark", "Consulting Minimal", "Custom"] },
         template: { type: "string" },
         transformationLevel: { type: "string" },
         notes: {
-          type: "array",
+          type: ["array", "null"],
           items: { type: "string" }
         }
       }
