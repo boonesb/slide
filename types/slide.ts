@@ -104,5 +104,15 @@ export interface GenerationDiagnostics {
   finalComputedLayout?: SlideSchema["layout"];
   validation: { success: boolean; errors?: unknown };
   repair: { attempted: boolean; success: boolean; errors?: unknown };
-  rendering: { success: boolean; warnings: string[]; overflowWarnings?: string[]; droppedContent?: string[]; errors: string[] };
+  rendering: {
+    success: boolean;
+    warnings: string[];
+    overflowWarnings?: string[];
+    droppedContent?: string[];
+    notes?: string[];
+    sourceClass?: string;
+    selectedArchetype?: string;
+    selectedTemplate?: string;
+    errors: string[];
+  };
 }

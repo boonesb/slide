@@ -1,6 +1,12 @@
 import { ARCHETYPES, type SlideArchetype, type SlideSchema } from "@/types/slide";
 
 export function makeMockSchema(archetype: SlideArchetype): SlideSchema {
+  const sections = [
+    { id: "s1", heading: "Prioritize activation", body: "Shorten time-to-value in onboarding.", bullets: ["Guided setup", "Role-based checklist"] },
+    { id: "s2", heading: "Strengthen success motion", body: "Operationalize account health reviews.", bullets: ["Weekly risk triage", "Executive sponsor map"] },
+    { id: "s3", heading: "Expand platform depth", body: "Drive cross-sell with proof-led value stories.", bullets: ["Quarterly value recap", "Use-case scorecards"] }
+  ];
+
   return {
     schemaVersion: "1.0.0",
     metadata: {
@@ -20,10 +26,7 @@ export function makeMockSchema(archetype: SlideArchetype): SlideSchema {
     content: {
       title: "Q3 growth priorities",
       subtitle: "Three levers to improve retention and expansion",
-      sections: [
-        { id: "s1", heading: "Prioritize activation", body: "Shorten time-to-value in onboarding.", bullets: ["Guided setup", "Role-based checklist"] },
-        { id: "s2", heading: "Strengthen success motion", body: "Operationalize account health reviews.", bullets: ["Weekly risk triage", "Executive sponsor map"] }
-      ],
+      sections: archetype === "three_card" ? sections : sections.slice(0, 2),
       supportingVisual: null,
       semanticObjects: [
         {
@@ -66,34 +69,6 @@ export function makeMockSchema(archetype: SlideArchetype): SlideSchema {
           w: 8,
           h: 0.9,
           zIndex: 1,
-          groupRole: null,
-          children: null,
-          assetRef: null
-        },
-        {
-          id: "e-card-1",
-          type: "card",
-          contentRef: "s1",
-          styleToken: "card_feature",
-          x: 0.6,
-          y: 1.7,
-          w: 5.9,
-          h: 2.1,
-          zIndex: 2,
-          groupRole: null,
-          children: null,
-          assetRef: null
-        },
-        {
-          id: "e-card-2",
-          type: "card",
-          contentRef: "s2",
-          styleToken: "card_neutral",
-          x: 6.7,
-          y: 1.7,
-          w: 5.9,
-          h: 2.1,
-          zIndex: 2,
           groupRole: null,
           children: null,
           assetRef: null

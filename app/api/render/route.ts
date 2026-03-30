@@ -26,6 +26,10 @@ export async function POST(req: Request) {
         warnings: layoutBuild.diagnostics.warnings,
         overflowWarnings: layoutBuild.diagnostics.overflowWarnings,
         droppedContent: layoutBuild.diagnostics.droppedContent,
+        notes: layoutBuild.diagnostics.notes,
+        sourceClass: layoutBuild.normalized.sourceClass,
+        selectedArchetype: layoutBuild.normalized.archetype,
+        selectedTemplate: layoutBuild.normalized.selectedTemplate,
         errors: []
       }
     });
