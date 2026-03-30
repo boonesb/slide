@@ -16,6 +16,10 @@ export default async function DebugPage({ params }: { params: Promise<{ id: stri
         <h2 className="mb-2 text-lg font-medium">Summary</h2>
         <pre className="overflow-auto rounded bg-slate-950 p-3 text-xs text-slate-100">{JSON.stringify(data.requestSummary, null, 2)}</pre>
       </section>
+      <section className="rounded border bg-white p-4">
+        <h2 className="mb-2 text-lg font-medium">AI Usage & Cost</h2>
+        <pre className="overflow-auto rounded bg-slate-950 p-3 text-xs text-slate-100">{JSON.stringify(data.ai, null, 2)}</pre>
+      </section>
       {[
         ["Raw AI Request", data.rawAiRequest],
         ["Raw AI Response", data.rawAiResponse],

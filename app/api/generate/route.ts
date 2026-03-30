@@ -1,8 +1,9 @@
 import { randomUUID } from "crypto";
 import { NextResponse } from "next/server";
-import { analyzeSlide, repairSchema } from "@/lib/ai/service";
+import { analyzeSlide, repairSchema, toErrorDetails } from "@/lib/ai/service";
 import { validateSchema } from "@/lib/validation/validate-schema";
 import { putDebug } from "@/lib/debug/store";
+import { estimateRequestCostUsd } from "@/lib/ai/cost";
 import type { Mode, ThemeName } from "@/types/slide";
 
 const MAX_SIZE = 10 * 1024 * 1024;
@@ -23,6 +24,11 @@ export async function POST(req: Request) {
 
   const debugId = randomUUID();
   const diagnostics = {
+    ai: {
+      requestedAt: new Date().toISOString(),
+      model: process.env.OPENAI_MODEL ?? "gpt-5-mini",
+      mock: process.env.OPENAI_USE_MOCK === "true"
+    },
     requestSummary: { fileName: file.name, mode, theme, fileType: file.type, fileSize: file.size },
     rawAiRequest: {},
     rawAiResponse: {},
@@ -32,9 +38,21 @@ export async function POST(req: Request) {
   };
 
   try {
-    const { schema, rawRequest, rawResponse } = await analyzeSlide({ imageBase64, mode, theme });
+    const { schema, rawRequest, rawResponse, usage, model, mock } = await analyzeSlide({
+      imageBase64,
+      imageMimeType: file.type,
+      mode,
+      theme
+    });
     diagnostics.rawAiRequest = rawRequest;
     diagnostics.rawAiResponse = rawResponse;
+    diagnostics.ai.model = model;
+    diagnostics.ai.mock = mock;
+    if (usage) {
+      const estimatedCostUsd = estimateRequestCostUsd(model, usage) ?? undefined;
+      diagnostics.ai.usage = usage;
+      diagnostics.ai.estimatedCostUsd = estimatedCostUsd;
+    }
 
     let validation = validateSchema(schema);
     diagnostics.validation = { success: validation.success, errors: validation.errors };
@@ -61,7 +79,14 @@ export async function POST(req: Request) {
     putDebug(debugId, { ...diagnostics, cleanedSchema: finalSchema, validation: { success: true } });
     return NextResponse.json({ schema: finalSchema, debugId });
   } catch (error) {
-    putDebug(debugId, { ...diagnostics, validation: { success: false, errors: String(error) } });
-    return new Response(`Generation failed: ${String(error)}`, { status: 500 });
+    const errorDetails = toErrorDetails(error);
+    putDebug(debugId, {
+      ...diagnostics,
+      ai: { ...diagnostics.ai, error: errorDetails },
+      validation: { success: false, errors: errorDetails }
+    });
+    return new Response(`Generation failed: ${errorDetails.message} (status: ${errorDetails.status ?? "n/a"})`, {
+      status: errorDetails.status ?? 500
+    });
   }
 }
