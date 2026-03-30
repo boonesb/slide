@@ -100,7 +100,9 @@ export interface GenerationDiagnostics {
   rawAiRequest: Record<string, unknown>;
   rawAiResponse: Record<string, unknown>;
   cleanedSchema?: SlideSchema;
+  normalizedSemantic?: Record<string, unknown>;
+  finalComputedLayout?: SlideSchema["layout"];
   validation: { success: boolean; errors?: unknown };
   repair: { attempted: boolean; success: boolean; errors?: unknown };
-  rendering: { success: boolean; warnings: string[]; errors: string[] };
+  rendering: { success: boolean; warnings: string[]; overflowWarnings?: string[]; droppedContent?: string[]; errors: string[] };
 }

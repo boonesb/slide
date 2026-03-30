@@ -40,6 +40,8 @@ export default async function DebugPage({ params }: { params: Promise<{ id: stri
         ["Raw AI Request", data.rawAiRequest],
         ["Raw AI Response", data.rawAiResponse],
         ["Cleaned Schema", data.cleanedSchema],
+        ["Normalized Semantic Content", data.normalizedSemantic],
+        ["Final Computed Layout", data.finalComputedLayout],
         ["Validation", data.validation],
         ["Repair", data.repair],
         ["Rendering", data.rendering]

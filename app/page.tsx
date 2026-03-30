@@ -64,7 +64,7 @@ export default function HomePage() {
     const renderResp = await fetch("/api/render", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ schema: payload.schema, theme, customThemeJson })
+      body: JSON.stringify({ schema: payload.schema, theme, customThemeJson, debugId: payload.debugId })
     });
 
     if (!renderResp.ok) {
@@ -83,7 +83,7 @@ export default function HomePage() {
     const renderResp = await fetch("/api/render", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ schema, theme, customThemeJson })
+      body: JSON.stringify({ schema, theme, customThemeJson, debugId })
     });
     const blob = await renderResp.blob();
     setDownloadUrl(URL.createObjectURL(blob));
