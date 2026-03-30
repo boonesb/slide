@@ -44,7 +44,13 @@ export default function HomePage() {
     setStatus("Analyzing slide");
     const res = await fetch("/api/generate", { method: "POST", body: formData });
     if (!res.ok) {
-      setError(await res.text());
+      try {
+        const payload = await res.json();
+        if (typeof payload?.debugId === "string") setDebugId(payload.debugId);
+        setError(typeof payload?.error === "string" ? payload.error : "Generation failed");
+      } catch {
+        setError(await res.text());
+      }
       return;
     }
 

@@ -77,8 +77,134 @@ export const slideJsonSchema = {
   required: ["schemaVersion", "metadata", "content", "layout"],
   properties: {
     schemaVersion: { type: "string" },
-    metadata: { type: "object" },
-    content: { type: "object" },
-    layout: { type: "object" }
+    metadata: {
+      type: "object",
+      additionalProperties: false,
+      required: [
+        "requestId",
+        "slideId",
+        "sourceType",
+        "mode",
+        "qualityProfile",
+        "slideArchetype",
+        "confidence",
+        "theme",
+        "template",
+        "transformationLevel"
+      ],
+      properties: {
+        requestId: { type: "string" },
+        slideId: { type: "string" },
+        sourceType: { type: "string", enum: ["image_upload"] },
+        mode: { type: "string", enum: MODES },
+        qualityProfile: { type: "string", enum: ["enterprise_b2b_v1"] },
+        slideArchetype: { type: "string", enum: ARCHETYPES },
+        subtype: { type: "string" },
+        confidence: { type: "number", minimum: 0, maximum: 1 },
+        theme: { type: "string", enum: ["Enterprise Clean", "Enterprise Dark", "Consulting Minimal", "Custom"] },
+        template: { type: "string" },
+        transformationLevel: { type: "string" },
+        notes: {
+          type: "array",
+          items: { type: "string" }
+        }
+      }
+    },
+    content: {
+      type: "object",
+      additionalProperties: false,
+      required: ["title", "sections", "semanticObjects"],
+      properties: {
+        title: { type: "string", minLength: 1 },
+        subtitle: { type: "string" },
+        sections: {
+          type: "array",
+          items: {
+            type: "object",
+            additionalProperties: false,
+            required: ["id", "body"],
+            properties: {
+              id: { type: "string" },
+              heading: { type: "string" },
+              body: { type: "string" },
+              bullets: {
+                type: "array",
+                items: { type: "string" }
+              }
+            }
+          }
+        },
+        supportingVisual: {
+          type: "object",
+          additionalProperties: false,
+          required: ["type", "description"],
+          properties: {
+            type: { type: "string", enum: ["icon", "chart", "diagram", "image"] },
+            description: { type: "string" }
+          }
+        },
+        semanticObjects: {
+          type: "array",
+          items: {
+            type: "object",
+            additionalProperties: false,
+            required: ["id", "kind", "role", "priority", "mustPreserve", "rewriteAllowed", "visualWeight"],
+            properties: {
+              id: { type: "string" },
+              kind: { type: "string" },
+              role: { type: "string" },
+              priority: { type: "integer", minimum: 1, maximum: 10 },
+              mustPreserve: { type: "boolean" },
+              rewriteAllowed: { type: "string", enum: REWRITE_ALLOWED },
+              visualWeight: { type: "string", enum: VISUAL_WEIGHT },
+              headline: { type: "string" },
+              body: { type: "string" },
+              iconHint: { type: "string" }
+            }
+          }
+        }
+      }
+    },
+    layout: {
+      type: "object",
+      additionalProperties: false,
+      required: ["slideSize", "background", "elements"],
+      properties: {
+        slideSize: { type: "string", enum: ["LAYOUT_WIDE"] },
+        background: {
+          type: "object",
+          additionalProperties: false,
+          required: ["fillToken"],
+          properties: {
+            fillToken: { type: "string" }
+          }
+        },
+        elements: {
+          type: "array",
+          items: {
+            type: "object",
+            additionalProperties: false,
+            required: ["id", "type", "styleToken", "x", "y", "w", "h", "zIndex"],
+            properties: {
+              id: { type: "string" },
+              type: { type: "string", enum: ["text", "shape", "card", "icon", "line", "image"] },
+              contentRef: { type: "string" },
+              styleToken: { type: "string" },
+              x: { type: "number", minimum: 0 },
+              y: { type: "number", minimum: 0 },
+              w: { type: "number", exclusiveMinimum: 0 },
+              h: { type: "number", exclusiveMinimum: 0 },
+              zIndex: { type: "integer" },
+              groupRole: { type: "string" },
+              children: {
+                type: "array",
+                items: { type: "string" }
+              },
+              assetRef: { type: "string" }
+            }
+          }
+        }
+      }
+    }
   }
 };
