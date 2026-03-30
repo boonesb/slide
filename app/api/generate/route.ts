@@ -4,7 +4,7 @@ import { analyzeSlide, repairSchema, toErrorDetails } from "@/lib/ai/service";
 import { validateSchema } from "@/lib/validation/validate-schema";
 import { putDebug } from "@/lib/debug/store";
 import { estimateRequestCostUsd } from "@/lib/ai/cost";
-import type { Mode, ThemeName } from "@/types/slide";
+import type { GenerationDiagnostics, Mode, ThemeName } from "@/types/slide";
 
 const MAX_SIZE = 10 * 1024 * 1024;
 const ACCEPTED = new Set(["image/png", "image/jpg", "image/jpeg", "image/webp"]);
@@ -23,7 +23,7 @@ export async function POST(req: Request) {
   const imageBase64 = bytes.toString("base64");
 
   const debugId = randomUUID();
-  const diagnostics = {
+  const diagnostics: GenerationDiagnostics = {
     ai: {
       requestedAt: new Date().toISOString(),
       model: process.env.OPENAI_MODEL ?? "gpt-5-mini",
@@ -46,12 +46,14 @@ export async function POST(req: Request) {
     });
     diagnostics.rawAiRequest = rawRequest;
     diagnostics.rawAiResponse = rawResponse;
-    diagnostics.ai.model = model;
-    diagnostics.ai.mock = mock;
-    if (usage) {
-      const estimatedCostUsd = estimateRequestCostUsd(model, usage) ?? undefined;
-      diagnostics.ai.usage = usage;
-      diagnostics.ai.estimatedCostUsd = estimatedCostUsd;
+    if (diagnostics.ai) {
+      diagnostics.ai.model = model;
+      diagnostics.ai.mock = mock;
+      if (usage) {
+        const estimatedCostUsd = estimateRequestCostUsd(model, usage) ?? undefined;
+        diagnostics.ai.usage = usage;
+        diagnostics.ai.estimatedCostUsd = estimatedCostUsd;
+      }
     }
 
     let validation = validateSchema(schema);
@@ -82,7 +84,9 @@ export async function POST(req: Request) {
     const errorDetails = toErrorDetails(error);
     putDebug(debugId, {
       ...diagnostics,
-      ai: { ...diagnostics.ai, error: errorDetails },
+      ai: diagnostics.ai
+        ? { ...diagnostics.ai, error: errorDetails }
+        : { requestedAt: new Date().toISOString(), model: process.env.OPENAI_MODEL ?? "gpt-5-mini", mock: false, error: errorDetails },
       validation: { success: false, errors: errorDetails }
     });
     return NextResponse.json(

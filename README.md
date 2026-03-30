@@ -8,8 +8,10 @@ Production-style Next.js starter for **image-to-editable-slide generation**.
 - Analyze with OpenAI Responses API (default model `gpt-5-mini`) or deterministic mock mode
 - Uses current Responses API structured output shape (`text.format`) for JSON schema generation
 - Build a typed 3-layer schema (`metadata`, `content`, `layout`)
+- Normalize semantic content and run deterministic archetype layout builders before rendering
 - Validate with Zod + reference checks, then perform one repair retry on failure
 - Let user edit detected text/content before final render
+- Apply overflow strategy (compress -> font-safe fitting -> drop lower-priority detail with diagnostics)
 - Render deterministic editable PPTX via PptxGenJS (with speaker notes placeholders)
 - Provide debug HTML page with raw request/response + normalized schema + diagnostics
 - Provide cost diagnostics page with usage tokens and estimated per-request/session costs
@@ -23,10 +25,19 @@ Production-style Next.js starter for **image-to-editable-slide generation**.
 4. `lib/validation/` app-side validation and contentRef checks
 5. `lib/templates/` archetype template registry (all 8 archetypes)
 6. `lib/themes/` design token themes + custom theme schema
-7. `lib/render/` deterministic schema-to-PPTX renderer
-8. `lib/debug/` ephemeral diagnostics store
+7. `lib/layout/` semantic normalization, deterministic archetype builders, overflow and guardrails
+8. `lib/render/` styled deterministic layout-to-PPTX renderer
+9. `lib/debug/` ephemeral diagnostics store
 
 This separates AI inference from deterministic layout/rendering, enabling maintainability and future multi-slide expansion.
+
+## Deterministic layout builder (quality pass)
+
+- AI output is treated as semantic structure first (archetype/title/subtitle/sections/priority), not final pixel geometry.
+- The app computes final zones, margins, gutters, card sizing, and hierarchy deterministically.
+- Primary quality focus archetypes: `title_hero`, `two_column`, `three_card`, `quote_proof`.
+- Secondary archetypes remain supported via a simpler fallback layout strategy.
+- Debug diagnostics now include normalized semantic content, final computed layout, overflow warnings, and dropped-content warnings.
 
 ## Modes
 

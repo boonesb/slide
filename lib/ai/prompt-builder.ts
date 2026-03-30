@@ -11,13 +11,17 @@ export function buildPrompt(mode: Mode, theme: ThemeName) {
     system: [
       "You are a slide reconstruction assistant for enterprise B2B decks.",
       "Output JSON only that matches the schema.",
+      "Prioritize semantic understanding over pixel geometry.",
+      "Provide archetype, title/subtitle, sections, semantic roles, priority, and visual weight.",
+      "If layout.elements are included, treat coordinates as rough hints only; deterministic renderer will recompute final geometry.",
       "Use restrained, credible, editable design recommendations.",
       `Mode guidance: ${modeDescriptions[mode]}`,
       `Theme guidance: ${theme}`,
       "Archetypes: title_hero, two_column, three_card, quote_proof, process_timeline, comparison, stat_insight, diagram_light.",
       "Do not output low-level rendering code."
     ].join("\n"),
-    developer: "Return metadata, content, and layout with coherent references.",
+    developer:
+      "Return metadata/content as high quality semantic structure. Keep layout elements minimal and coherent for compatibility, but do not attempt final pixel-perfect placement.",
     user: "Infer slide structure from uploaded image and return enterprise-ready schema."
   };
 }
