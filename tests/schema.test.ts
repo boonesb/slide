@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { makeMockSchema } from "@/lib/ai/mock-data";
+import { slideJsonSchema } from "@/lib/schema/slide-schema";
 import { validateSchema } from "@/lib/validation/validate-schema";
 
 describe("schema validation", () => {
@@ -13,5 +14,13 @@ describe("schema validation", () => {
     schema.layout.elements[0].contentRef = "missing";
     const result = validateSchema(schema);
     expect(result.success).toBe(false);
+  });
+
+  it("keeps metadata.required in sync with metadata.properties", () => {
+    const metadata = slideJsonSchema.properties.metadata as {
+      properties: Record<string, unknown>;
+      required: string[];
+    };
+    expect(metadata.required).toEqual(Object.keys(metadata.properties));
   });
 });
